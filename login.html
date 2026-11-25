@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal Pengelola — Sanggar Tari Hikari</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       1. RESET & VARIABEL TEMA
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep:    #0a0f1a;
+      --bg-mid:     #0e1726;
+      --gold:       #d4af37;
+      --gold-soft:  #f0d98c;
+      --gold-glow:  rgba(212, 175, 55, 0.55);
+      --gold-line:  rgba(212, 175, 55, 0.35);
+      --text-dim:   #a9a293;
+      --err:        #ff8a80;
+      --err-bg:     rgba(255, 90, 80, 0.10);
+      --ok:         #8fe3b0;
+      --ok-bg:      rgba(90, 220, 140, 0.10);
+      --font-title: 'Cinzel', serif;
+      --font-script:'Cormorant Garamond', serif;
+      --font-body:  'Montserrat', sans-serif;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--gold-soft);
+      background: radial-gradient(ellipse at 50% 30%, var(--bg-mid) 0%, var(--bg-deep) 60%, #05080f 100%);
+      min-height: 100vh;
+      min-height: 100dvh;
+      overflow-x: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      position: relative;
+    }
+
+    /* ============================================================
+       2. ORNAMEN GAPURA CANDI BENTAR (Sudah bersih tanpa blend mode)
+       ============================================================ */
+    .gapura-wrap {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      perspective: 1000px;
+    }
+    
+    .gapura-img {
+      width: min(100vw, 900px);
+      height: auto;
+      max-height: 90vh;
+      object-fit: contain;
+      
+      /* Opacity dasar & efek glow emas */
+      opacity: 0.15;
+      filter: drop-shadow(0 0 30px rgba(212,175,55,.4)) contrast(1.1);
+      
+      transition: transform 1.8s cubic-bezier(.22,1,.36,1), opacity 1.8s ease;
+      will-change: transform, opacity;
+      transform: scale(1) translate(0, 0);
+    }
+
+    /* Animasi saat login sukses: Gapura membesar & memudar */
+    body.unlocked .gapura-img {
+      transform: scale(2.2);
+      opacity: 0;
+    }
+
+    /* ============================================================
+       3. EFEK GOLDEN SWEEP
+       ============================================================ */
+    .gold-sweep {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      pointer-events: none;
+      opacity: 0;
+      background: linear-gradient(105deg,
+        transparent 30%,
+        rgba(240,217,140,.0) 40%,
+        rgba(240,217,140,.6) 50%,
+        rgba(240,217,140,.0) 60%,
+        transparent 70%);
+      background-size: 250% 100%;
+      background-position: 150% 0;
+    }
+    body.unlocked .gold-sweep {
+      opacity: 1;
+      animation: sweep 1.6s ease-in-out forwards;
+    }
+    @keyframes sweep {
+      0%   { background-position: 150% 0; opacity: 0; }
+      20%  { opacity: 1; }
+      100% { background-position: -150% 0; opacity: 0; }
+    }
+
+    /* ============================================================
+       4. KARTU LOGIN
+       ============================================================ */
+    .login-wrap {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 420px;
+      animation: fadeIn .9s ease forwards;
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+
+    .login-card {
+      background: rgba(16, 26, 43, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--gold-line);
+      border-radius: 14px;
+      padding: clamp(1.6rem, 5vw, 2.4rem);
+      box-shadow: 0 24px 60px -24px rgba(0,0,0,.9),
+                  inset 0 0 0 1px rgba(240,217,140,.05);
+      position: relative;
+    }
+    .login-card::before,
+    .login-card::after {
+      content: '';
+      position: absolute;
+      width: 28px; height: 28px;
+      border: 1px solid var(--gold);
+      opacity: .8;
+    }
+    .login-card::before { top: -1px; left: -1px; border-right: none; border-bottom: none; border-top-left-radius: 14px; }
+    .login-card::after  { bottom: -1px; right: -1px; border-left: none; border-top: none; border-bottom-right-radius: 14px; }
+
+    .login-logo {
+      display: block;
+      width: 64px; height: 64px;
+      object-fit: contain;
+      margin: 0 auto .9rem;
+      filter: drop-shadow(0 0 12px var(--gold-glow));
+    }
+    .login-logo.logo-missing { display: none; }
+    .login-logo-fallback {
+      display: none;
+      font-family: var(--font-script);
+      font-size: 1.8rem;
+      text-align: center;
+      color: var(--gold-soft);
+      margin-bottom: .9rem;
+    }
+    .login-logo.logo-missing + .login-logo-fallback { display: block; }
+
+    .login-title {
+      font-family: var(--font-title);
+      font-weight: 400;
+      font-size: clamp(1.25rem, 4.6vw, 1.6rem);
+      color: #fff;
+      text-align: center;
+      letter-spacing: .02em;
+      margin-bottom: .4rem;
+    }
+    .login-sub {
+      font-size: clamp(.72rem, 2.8vw, .82rem);
+      font-weight: 300;
+      color: var(--text-dim);
+      text-align: center;
+      margin-bottom: 1.6rem;
+      line-height: 1.6;
+    }
+
+    /* ============ FORM ============ */
+    .field { margin-bottom: 1.05rem; }
+    .field label {
+      display: block;
+      font-size: .7rem;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: .45rem;
+    }
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-wrap input {
+      width: 100%;
+      background: rgba(8, 12, 22, 0.7);
+      border: 1px solid rgba(212,175,55,.25);
+      border-radius: 999px;
+      padding: .85rem 1.1rem;
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .3s ease, box-shadow .3s ease, background .3s ease;
+    }
+    .input-wrap input::placeholder { color: rgba(169,162,147,.55); }
+    .input-wrap input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(212,175,55,.12);
+      background: rgba(8, 12, 22, 0.9);
+    }
+    .input-wrap.has-toggle input { padding-right: 3.2rem; }
+
+    .toggle-pass {
+      position: absolute;
+      right: .5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 38px; height: 38px;
+      display: grid;
+      place-items: center;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      border-radius: 50%;
+      transition: color .3s ease, background .3s ease;
+    }
+    .toggle-pass:hover { color: var(--gold-soft); background: rgba(212,175,55,.08); }
+    .toggle-pass svg { width: 18px; height: 18px; stroke: currentColor; }
+
+    /* ============ PESAN STATUS ============ */
+    .status {
+      font-size: .78rem;
+      padding: .7rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+      line-height: 1.5;
+    }
+    .status.show { display: block; }
+    .status.error {
+      color: var(--err);
+      background: var(--err-bg);
+      border: 1px solid rgba(255,90,80,.35);
+    }
+    .status.success {
+      color: var(--ok);
+      background: var(--ok-bg);
+      border: 1px solid rgba(90,220,140,.35);
+    }
+
+    /* ============ TOMBOL UTAMA ============ */
+    .btn-submit {
+      width: 100%;
+      margin-top: .4rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .6rem;
+      font-family: var(--font-body);
+      font-size: .88rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      padding: .95rem 1.4rem;
+      border-radius: 999px;
+      border: 1px solid var(--gold);
+      background: linear-gradient(135deg, var(--gold) 0%, #b8912f 100%);
+      color: #0a0f1a;
+      cursor: pointer;
+      transition: transform .3s ease, box-shadow .3s ease, opacity .3s ease;
+      box-shadow: 0 6px 20px -8px var(--gold-glow);
+    }
+    .btn-submit:hover:not(:disabled),
+    .btn-submit:focus-visible:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -8px var(--gold-glow);
+      outline: none;
+    }
+    .btn-submit:disabled { opacity: .7; cursor: not-allowed; }
+
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(10,15,26,.35);
+      border-top-color: #0a0f1a;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    .btn-submit.loading .spinner { display: block; }
+    .btn-submit.loading .btn-label { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      margin-top: 1.3rem;
+      font-size: .76rem;
+      letter-spacing: .08em;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color .3s ease;
+    }
+    .back-link:hover { color: var(--gold-soft); }
+    .back-link svg { width: 14px; height: 14px; stroke: currentColor; }
+
+    /* ============================================================
+       5. RESPONSIF
+       ============================================================ */
+    @media (max-width: 768px) {
+      .gapura-img { width: 140vw; opacity: 0.12; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       A. ORNAMEN GAPURA (Pastikan file sudah PNG transparan)
+       ============================================================ -->
+  <div class="gapura-wrap" id="gapuraWrap">
+    <img 
+      src="assets/gapura bentar.png" 
+      alt="Ornamen Gapura Candi Bentar" 
+      class="gapura-img" 
+      id="gapuraImg"
+      onerror="this.style.display='none';"
+    />
+  </div>
+
+  <!-- Golden sweep -->
+  <div class="gold-sweep" aria-hidden="true"></div>
+
+  <!-- ============================================================
+       B. KARTU LOGIN
+       ============================================================ -->
+  <div class="login-wrap" id="loginWrap">
+    <div class="login-card">
+      <img
+        src="assets/LogoIntro.png"
+        alt="Logo Sanggar Hikari"
+        class="login-logo"
+        onerror="this.classList.add('logo-missing'); this.removeAttribute('src');"
+      />
+      <span class="login-logo-fallback">HIKARI</span>
+
+      <h1 class="login-title">Portal Pengelola Sanggar</h1>
+      <p class="login-sub">Masuk untuk mengelola data &amp; galeri member.</p>
+
+      <!-- Info akun demo -->
+      <div style="font-size:.7rem;text-align:center;color:var(--text-dim);
+                  border:1px dashed var(--gold-line);border-radius:8px;
+                  padding:.5rem .8rem;margin-bottom:1.1rem;letter-spacing:.04em;">
+        Demo: <strong style="color:var(--gold-soft)">admin@hikari.com</strong>
+        / <strong style="color:var(--gold-soft)">hikari123</strong>
+      </div>
+
+      <div class="status" id="statusBox" role="alert" aria-live="polite"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label for="email">Email Admin</label>
+          <div class="input-wrap">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Masukkan email admin"
+              autocomplete="username"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">Kata Sandi</label>
+          <div class="input-wrap has-toggle">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Masukkan kata sandi"
+              autocomplete="current-password"
+              required
+            />
+            <button
+              type="button"
+              class="toggle-pass"
+              id="togglePass"
+              aria-label="Tampilkan kata sandi"
+              aria-pressed="false"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btnSubmit">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="btn-label">Masuk ke Dashboard</span>
+        </button>
+      </form>
+
+      <a href="intro.html" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Kembali ke Intro
+      </a>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       C. JAVASCRIPT — LOGIKA & PARALLAX
+       ============================================================ -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const DEMO_USER = { email: 'admin@hikari.com', password: 'hikari123' };
+
+      const loginForm  = document.getElementById('loginForm');
+      const emailInput = document.getElementById('email');
+      const passInput  = document.getElementById('password');
+      const togglePass = document.getElementById('togglePass');
+      const btnSubmit  = document.getElementById('btnSubmit');
+      const statusBox  = document.getElementById('statusBox');
+      const gapuraImg  = document.getElementById('gapuraImg');
+
+      /* --- 1. EFEK PARALLAX GAPURA --- */
+      document.addEventListener('mousemove', (e) => {
+        if (document.body.classList.contains('unlocked')) return;
+        const xAxis = (window.innerWidth / 2 - e.pageX) / 40;
+        const yAxis = (window.innerHeight / 2 - e.pageY) / 40;
+        gapuraImg.style.transform = `translate(${xAxis}px, ${yAxis}px) scale(1.02)`;
+      });
+      
+      document.addEventListener('touchmove', (e) => {
+        if (document.body.classList.contains('unlocked') || !e.touches[0]) return;
+        const xAxis = (window.innerWidth / 2 - e.touches[0].clientX) / 40;
+        const yAxis = (window.innerHeight / 2 - e.touches[0].clientY) / 40;
+        gapuraImg.style.transform = `translate(${xAxis}px, ${yAxis}px) scale(1.02)`;
+      }, { passive: true });
+
+      /* --- 2. UTIL STATUS --- */
+      function showStatus(message, type = 'error') {
+        statusBox.textContent = message;
+        statusBox.className = 'status show ' + type;
+      }
+      function clearStatus() {
+        statusBox.textContent = '';
+        statusBox.className = 'status';
+      }
+
+      /* --- 3. TOGGLE PASSWORD --- */
+      togglePass.addEventListener('click', () => {
+        const isHidden = passInput.type === 'password';
+        passInput.type = isHidden ? 'text' : 'password';
+        togglePass.setAttribute('aria-pressed', String(isHidden));
+        togglePass.innerHTML = isHidden
+          ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+               <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+               <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+               <line x1="1" y1="1" x2="23" y2="23"/>
+             </svg>`
+          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+               <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>
+               <circle cx="12" cy="12" r="3"/>
+             </svg>`;
+      });
+
+      /* --- 4. SUBMIT FORM & ANIMASI --- */
+      loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        clearStatus();
+
+        const email = emailInput.value.trim();
+        const password = passInput.value;
+
+        if (!email || !password) {
+          showStatus('Email dan kata sandi wajib diisi.', 'error');
+          return;
+        }
+
+        btnSubmit.disabled = true;
+        btnSubmit.classList.add('loading');
+
+        setTimeout(() => {
+          const ok = email.toLowerCase() === DEMO_USER.email && password === DEMO_USER.password;
+
+          if (!ok) {
+            btnSubmit.disabled = false;
+            btnSubmit.classList.remove('loading');
+            showStatus('Email atau kata sandi salah. Silakan coba lagi.', 'error');
+            return;
+          }
+
+          // SUKSES: Mainkan animasi
+          showStatus('Akses Diterima. Membuka Beranda...', 'success');
+          document.body.classList.add('unlocked'); 
+          
+          // Kunci posisi gambar agar transisi CSS berjalan mulus
+          gapuraImg.style.transition = 'transform 1.8s cubic-bezier(.22,1,.36,1), opacity 1.8s ease';
+          gapuraImg.style.transform = 'scale(2.2)'; 
+
+          setTimeout(() => {
+            window.location.href = 'home.html';
+          }, 1600);
+
+        }, 800);
+      });
+
+      /* Autofokus */
+      emailInput.focus();
+    });
+  </script>
+</body>
+</html>
