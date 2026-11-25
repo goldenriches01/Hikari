@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sanggar Tari Hikari — Tentang Sanggar</title>
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       1. RESET & VARIABEL TEMA
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep:    #0a0f1a;
+      --bg-mid:     #0e1726;
+      --bg-card:    #101a2b;
+      --gold:       #d4af37;
+      --gold-soft:  #f0d98c;
+      --gold-glow:  rgba(212, 175, 55, 0.55);
+      --gold-line:  rgba(212, 175, 55, 0.35);
+      --text-main:  #ece6d8;
+      --text-dim:   #a9a293;
+      --font-title: 'Cinzel', 'Cormorant Garamond', serif;
+      --font-script:'Cormorant Garamond', serif;
+      --font-body:  'Montserrat', sans-serif;
+      --nav-h: 74px;
+      --tabbar-h: 70px;
+    }
+
+    html { scroll-behavior: smooth; }
+    html, body { min-height: 100%; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--text-main);
+      background:
+        radial-gradient(ellipse at 50% 0%, var(--bg-mid) 0%, var(--bg-deep) 55%, #05080f 100%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+      line-height: 1.65;
+    }
+
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; }
+
+    /* ============================================================
+       2. NAVBAR DESKTOP (fixed, glass blur, garis emas bawah)
+       ============================================================ */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      z-index: 100;
+      display: none; /* default sembunyi, muncul di desktop */
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(1.2rem, 4vw, 3rem);
+      background: rgba(10, 15, 26, 0.65);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--gold-line);
+      transition: background .4s ease, box-shadow .4s ease;
+    }
+    .topbar.scrolled {
+      background: rgba(8, 12, 22, 0.92);
+      box-shadow: 0 8px 30px -12px rgba(0,0,0,.8);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      flex-shrink: 0;
+    }
+    .brand-logo {
+      width: 42px; height: 42px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px var(--gold-glow));
+    }
+    .brand-logo.logo-missing { display: none; }
+    .brand-fallback {
+      display: none;
+      font-family: var(--font-script);
+      font-size: 1.1rem;
+      color: var(--gold-soft);
+    }
+    .brand-logo.logo-missing + .brand-fallback { display: block; }
+    .brand-name {
+      font-family: var(--font-title);
+      font-size: .95rem;
+      letter-spacing: .22em;
+      color: var(--gold-soft);
+      white-space: nowrap;
+    }
+
+    .menu-desktop {
+      display: flex;
+      align-items: center;
+      gap: clamp(.6rem, 1.6vw, 1.4rem);
+      list-style: none;
+    }
+    .menu-desktop a {
+      font-size: .78rem;
+      letter-spacing: .08em;
+      color: var(--text-dim);
+      padding: .45rem .2rem;
+      position: relative;
+      transition: color .3s ease;
+      white-space: nowrap;
+    }
+    .menu-desktop a::after {
+      content: '';
+      position: absolute;
+      left: 0; bottom: 0;
+      width: 100%; height: 1px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .35s ease;
+    }
+    .menu-desktop a:hover,
+    .menu-desktop a.active { color: var(--gold-soft); }
+    .menu-desktop a:hover::after,
+    .menu-desktop a.active::after { transform: scaleX(1); }
+
+    /* Tombol Booking menonjol */
+    .btn-nav-booking {
+      background: linear-gradient(135deg, var(--gold) 0%, #b8912f 100%);
+      color: #0a0f1a !important;
+      font-weight: 600;
+      padding: .55rem 1.15rem !important;
+      border-radius: 999px;
+      box-shadow: 0 4px 16px -6px var(--gold-glow);
+      transition: transform .3s ease, box-shadow .3s ease;
+    }
+    .btn-nav-booking:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px -6px var(--gold-glow);
+    }
+    .btn-nav-booking::after { display: none; }
+
+    /* ============================================================
+       3. MOBILE HEADER (hanya logo di tengah atas)
+       ============================================================ */
+    .mobile-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 1.2rem;
+      position: relative;
+      z-index: 90;
+    }
+    .mobile-header .brand-logo { width: 48px; height: 48px; }
+
+    /* ============================================================
+       4. BOTTOM TAB BAR (mobile)
+       ============================================================ */
+    .tabbar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: var(--tabbar-h);
+      z-index: 120;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-around;
+      background: rgba(8, 12, 22, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--gold-line);
+      padding: 0 .2rem;
+    }
+    .tabbar a {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      color: var(--text-dim);
+      font-size: .58rem;
+      letter-spacing: .03em;
+      padding: .35rem .1rem;
+      transition: color .3s ease, transform .3s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tabbar svg { width: 20px; height: 20px; stroke-width: 1.6; }
+    .tabbar a.active { color: var(--gold-soft); }
+    .tabbar a.active svg { stroke: var(--gold-soft); filter: drop-shadow(0 0 6px var(--gold-glow)); }
+    .tabbar a:active { transform: scale(.94); }
+
+    /* Tab Booking menonjol */
+    .tabbar a.tab-booking {
+      background: linear-gradient(135deg, var(--gold) 0%, #b8912f 100%);
+      color: #0a0f1a;
+      font-weight: 600;
+      border-radius: 14px;
+      margin: .5rem .25rem;
+      flex: 1.1;
+    }
+    .tabbar a.tab-booking svg { stroke: #0a0f1a; }
+    .tabbar a.tab-booking.active,
+    .tabbar a.tab-booking { color: #0a0f1a; }
+
+    /* ============================================================
+       5. LAYOUT UMUM & KONTAINER
+       ============================================================ */
+    main {
+      position: relative;
+      z-index: 1;
+      padding-top: 0;
+    }
+    .container {
+      width: 100%;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 clamp(1.2rem, 4vw, 3rem);
+    }
+
+    /* ============================================================
+       6. HERO SECTION (Tentang Sanggar, layar pertama)
+       ============================================================ */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      padding: calc(var(--nav-h) + 2rem) 1.2rem 4rem;
+    }
+    /* Watermark Gunungan Wayang */
+    .hero-gunungan {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: min(88vw, 620px);
+      transform: translate(-50%, -50%);
+      opacity: .12;
+      pointer-events: none;
+      z-index: 0;
+      filter: sepia(1) saturate(2) hue-rotate(-8deg) drop-shadow(0 0 30px rgba(212,175,55,.25));
+      animation: floatBreath 9s ease-in-out infinite;
+      -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+              mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+    }
+    @keyframes floatBreath {
+      0%, 100% { transform: translate(-50%, -50%) scale(1);      opacity: .10; }
+      50%      { transform: translate(-50%, -52%) scale(1.03);   opacity: .14; }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 780px;
+      animation: heroFade 1.4s ease forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    @keyframes heroFade {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-eyebrow {
+      font-size: clamp(.62rem, 2.6vw, .78rem);
+      letter-spacing: .45em;
+      color: var(--gold);
+      margin-bottom: 1.4rem;
+      text-transform: uppercase;
+    }
+    .hero-title {
+      font-family: var(--font-title);
+      font-weight: 400;
+      font-size: clamp(1.9rem, 6.4vw, 3.6rem);
+      line-height: 1.18;
+      color: #fff;
+      letter-spacing: .01em;
+      margin-bottom: 1.3rem;
+      text-shadow: 0 4px 30px rgba(0,0,0,.6);
+    }
+    .hero-title em {
+      font-family: var(--font-script);
+      font-style: italic;
+      color: var(--gold-soft);
+      font-size: 1.08em;
+      text-shadow: 0 0 22px var(--gold-glow);
+    }
+    .hero-desc {
+      font-size: clamp(.85rem, 3.2vw, 1rem);
+      font-weight: 300;
+      color: var(--text-dim);
+      max-width: 620px;
+      margin: 0 auto 2.2rem;
+      line-height: 1.8;
+    }
+    .hero-cta {
+      display: flex;
+      gap: .9rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Tombol umum */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      font-size: clamp(.78rem, 3vw, .88rem);
+      letter-spacing: .1em;
+      font-weight: 500;
+      padding: .95rem 1.8rem;
+      border-radius: 999px;
+      border: 1px solid var(--gold);
+      cursor: pointer;
+      transition: transform .35s ease, box-shadow .35s ease, background .35s ease, color .35s ease;
+      white-space: nowrap;
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold) 0%, #b8912f 100%);
+      color: #0a0f1a;
+      box-shadow: 0 6px 20px -8px var(--gold-glow);
+    }
+    .btn-gold:hover, .btn-gold:focus-visible {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 32px -8px var(--gold-glow);
+      outline: none;
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--gold-soft);
+    }
+    .btn-outline:hover, .btn-outline:focus-visible {
+      background: rgba(212,175,55,.1);
+      transform: translateY(-3px);
+      outline: none;
+    }
+
+    /* Scroll indicator */
+    .scroll-hint {
+      position: absolute;
+      bottom: 1.6rem; left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .4rem;
+      color: var(--text-dim);
+      font-size: .62rem;
+      letter-spacing: .25em;
+      opacity: .7;
+      animation: bounceHint 2.4s ease-in-out infinite;
+    }
+    .scroll-hint::after {
+      content: '';
+      width: 1px; height: 26px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+    }
+    @keyframes bounceHint {
+      0%, 100% { transform: translate(-50%, 0); }
+      50%      { transform: translate(-50%, 6px); }
+    }
+
+    /* ============================================================
+       7. SEKSI CERITA & VISI (2 kolom desktop, 1 kolom HP)
+       ============================================================ */
+    .section {
+      padding: clamp(3.5rem, 8vw, 6.5rem) 0;
+      position: relative;
+    }
+    .section-title {
+      font-family: var(--font-title);
+      font-weight: 400;
+      font-size: clamp(1.5rem, 5vw, 2.3rem);
+      color: #fff;
+      margin-bottom: .6rem;
+      letter-spacing: .02em;
+    }
+    .section-title em {
+      font-family: var(--font-script);
+      font-style: italic;
+      color: var(--gold-soft);
+    }
+    .section-kicker {
+      font-size: clamp(.6rem, 2.5vw, .72rem);
+      letter-spacing: .4em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: .9rem;
+    }
+    .divider-gold {
+      width: 70px; height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      margin: 1.2rem 0 2rem;
+    }
+    .divider-gold.center { margin-left: auto; margin-right: auto; }
+
+    /* Grid cerita */
+    .story-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: clamp(2rem, 5vw, 3.5rem);
+      align-items: center;
+    }
+    .story-text p {
+      font-size: clamp(.85rem, 3.1vw, .98rem);
+      color: var(--text-dim);
+      font-weight: 300;
+      margin-bottom: 1.1rem;
+      line-height: 1.85;
+    }
+    .story-text strong { color: var(--gold-soft); font-weight: 500; }
+
+    /* Kartu foto bingkai emas */
+    .photo-frame {
+      position: relative;
+      border: 1px solid var(--gold-line);
+      border-radius: 6px;
+      padding: 10px;
+      background: rgba(16, 26, 43, .55);
+      box-shadow: 0 20px 50px -20px rgba(0,0,0,.8);
+    }
+    .photo-frame::before,
+    .photo-frame::after {
+      content: '';
+      position: absolute;
+      width: 26px; height: 26px;
+      border: 1px solid var(--gold);
+      opacity: .8;
+    }
+    .photo-frame::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+    .photo-frame::after  { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+    .photo-inner {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      border-radius: 3px;
+      background:
+        linear-gradient(135deg, #131f33 0%, #0b1424 100%);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 1.5rem;
+    }
+    .photo-inner img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .8rem;
+      color: var(--text-dim);
+      font-size: .75rem;
+      letter-spacing: .14em;
+    }
+    .photo-placeholder svg { width: 46px; height: 46px; stroke: var(--gold); opacity: .75; }
+
+    /* ============================================================
+       8. SEKSI KEUNGGULAN (3 kartu)
+       ============================================================ */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.3rem;
+      margin-top: 2.4rem;
+    }
+    .card {
+      background: linear-gradient(160deg, rgba(18,29,47,.9) 0%, rgba(11,18,32,.9) 100%);
+      border: 1px solid rgba(212,175,55,.18);
+      border-radius: 10px;
+      padding: clamp(1.5rem, 4vw, 2rem);
+      text-align: left;
+      transition: transform .4s ease, border-color .4s ease, box-shadow .4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(212,175,55,.14), transparent 60%);
+      opacity: 0;
+      transition: opacity .4s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: var(--gold-line);
+      box-shadow: 0 18px 40px -20px rgba(212,175,55,.35);
+    }
+    .card:hover::before { opacity: 1; }
+
+    .card-icon {
+      width: 52px; height: 52px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--gold-line);
+      border-radius: 50%;
+      margin-bottom: 1.2rem;
+      position: relative;
+      z-index: 1;
+    }
+    .card-icon svg { width: 24px; height: 24px; stroke: var(--gold-soft); }
+    .card h3 {
+      font-family: var(--font-title);
+      font-size: clamp(1rem, 3.4vw, 1.15rem);
+      font-weight: 400;
+      color: #fff;
+      margin-bottom: .6rem;
+      position: relative;
+      z-index: 1;
+    }
+    .card p {
+      font-size: clamp(.78rem, 2.9vw, .88rem);
+      color: var(--text-dim);
+      font-weight: 300;
+      line-height: 1.75;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ============================================================
+       9. BANNER CTA PENUTUP
+       ============================================================ */
+    .cta-banner {
+      position: relative;
+      border: 1px solid var(--gold-line);
+      border-radius: 12px;
+      padding: clamp(2rem, 6vw, 3.4rem) clamp(1.4rem, 5vw, 3rem);
+      text-align: center;
+      background:
+        radial-gradient(ellipse at center, rgba(212,175,55,.10) 0%, transparent 70%),
+        linear-gradient(160deg, rgba(16,26,43,.9), rgba(8,12,22,.95));
+      overflow: hidden;
+    }
+    .cta-banner::before,
+    .cta-banner::after {
+      content: '';
+      position: absolute;
+      width: 34px; height: 34px;
+      border: 1px solid var(--gold);
+      opacity: .7;
+    }
+    .cta-banner::before { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+    .cta-banner::after  { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+    .cta-banner h2 {
+      font-family: var(--font-title);
+      font-weight: 400;
+      font-size: clamp(1.35rem, 4.6vw, 2rem);
+      color: #fff;
+      margin-bottom: 1rem;
+      line-height: 1.3;
+    }
+    .cta-banner h2 em {
+      font-family: var(--font-script);
+      font-style: italic;
+      color: var(--gold-soft);
+    }
+    .cta-banner p {
+      font-size: clamp(.82rem, 3vw, .95rem);
+      color: var(--text-dim);
+      font-weight: 300;
+      max-width: 620px;
+      margin: 0 auto 1.8rem;
+      line-height: 1.8;
+    }
+
+    /* ============================================================
+       10. FOOTER
+       ============================================================ */
+    .footer {
+      border-top: 1px solid rgba(212,175,55,.15);
+      padding: 2.2rem 0 1.8rem;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .footer p {
+      font-size: .72rem;
+      letter-spacing: .1em;
+      color: var(--text-dim);
+      opacity: .7;
+    }
+    .footer .footer-brand {
+      font-family: var(--font-title);
+      color: var(--gold-soft);
+      letter-spacing: .25em;
+      font-size: .8rem;
+      margin-bottom: .6rem;
+    }
+
+    /* ============================================================
+       11. RESPONSIF
+       ============================================================ */
+    /* Desktop: tampilkan topbar, sembunyikan mobile header & tabbar */
+    @media (min-width: 769px) {
+      .topbar { display: flex; }
+      .mobile-header { display: none; }
+      .tabbar { display: none; }
+
+      .hero { padding-top: calc(var(--nav-h) + 3rem); }
+
+      .story-grid { grid-template-columns: 1.1fr .9fr; }
+      .cards-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* Mobile: konten diberi padding bawah agar tidak tertutup tabbar */
+    @media (max-width: 768px) {
+      main { padding-bottom: calc(var(--tabbar-h) + 20px); }
+
+      .hero { min-height: auto; padding: 1.5rem 1.2rem 3.5rem; }
+      .hero-gunungan { width: 118vw; opacity: .10; }
+
+      .scroll-hint { display: none; }
+
+      .btn { padding: .85rem 1.4rem; }
+
+      /* section spacing di HP */
+      .section { padding: 2.8rem 0; }
+    }
+
+    /* Kurangi gerakan */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       A. TOPBAR DESKTOP
+       ============================================================ -->
+  <header class="topbar" id="topbar">
+    <a href="home.html" class="brand" aria-label="Beranda Sanggar Hikari">
+      <img src="assets/LogoIntro.png" alt="Logo Sanggar Hikari" class="brand-logo"
+           onerror="this.classList.add('logo-missing'); this.removeAttribute('src');" />
+      <span class="brand-fallback">HIKARI</span>
+      <span class="brand-name">SANGGAR HIKARI</span>
+    </a>
+
+    <nav aria-label="Navigasi utama">
+      <ul class="menu-desktop">
+        <li><a href="#tentang" class="active">Tentang Sanggar</a></li>
+        <li><a href="tarian.html">Daftar Tema Tarian</a></li>
+        <li><a href="event.html">Event</a></li>
+        <li><a href="member.html">Daftar Member</a></li>
+        <li><a href="sosmed.html">Sosial Media</a></li>
+        <li><a href="booking.html" class="btn-nav-booking">Booking</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ============================================================
+       B. MOBILE HEADER (logo saja)
+       ============================================================ -->
+  <div class="mobile-header">
+    <a href="home.html" aria-label="Beranda Sanggar Hikari">
+      <img src="assets/LogoIntro.png" alt="Logo Sanggar Hikari" class="brand-logo"
+           onerror="this.classList.add('logo-missing'); this.removeAttribute('src');" />
+    </a>
+  </div>
+
+  <!-- ============================================================
+       C. KONTEN UTAMA
+       ============================================================ -->
+  <main>
+
+    <!-- ============ HERO / TENTANG SANGGAR ============ -->
+    <section class="hero" id="tentang">
+      <!-- Watermark Gunungan Wayang -->
+      <img
+        src="assets/siluet gunungan wayang.png"
+        alt=""
+        class="hero-gunungan"
+        aria-hidden="true"
+        onerror="this.style.display='none';"
+      />
+
+      <div class="hero-content">
+        <p class="hero-eyebrow">SENI • GERAK • EKSPRESI</p>
+        <h1 class="hero-title">
+          Melestarikan Jiwa Budaya<br>
+          Melalui <em>Keindahan Gerak</em>
+        </h1>
+        <p class="hero-desc">
+          Sanggar Tari Hikari adalah wadah seni yang menghidupkan kembali pesona tari
+          tradisional dan kreasi Nusantara. Setiap gerak kami adalah cahaya — menghadirkan
+          keanggunan budaya untuk berbagai perhelatan istimewa Anda.
+        </p>
+        <div class="hero-cta">
+          <a href="booking.html" class="btn btn-gold">Booking Penampilan</a>
+          <a href="tarian.html" class="btn btn-outline">Jelajahi Tema Tarian</a>
+        </div>
+      </div>
+
+      <div class="scroll-hint" aria-hidden="true">GULIR</div>
+    </section>
+
+    <!-- ============ CERITA & VISI SANGGAR ============ -->
+    <section class="section" id="cerita">
+      <div class="container">
+        <p class="section-kicker">Tentang Kami</p>
+        <h2 class="section-title">Cerita &amp; <em>Visi</em> Sanggar</h2>
+        <div class="divider-gold"></div>
+
+        <div class="story-grid">
+          <div class="story-text">
+            <p>
+              Berawal dari kecintaan mendalam terhadap warisan seni Nusantara,
+              <strong>Sanggar Tari Hikari</strong> lahir sebagai ruang bagi para penari
+              untuk tumbuh, berkarya, dan membagikan keindahan gerak kepada dunia.
+            </p>
+            <p>
+              Nama <strong>“Hikari”</strong> berarti <em>cahaya</em> — sebuah filosofi
+              bahwa seni tari adalah cahaya yang menghidupkan budaya, menyatukan generasi,
+              dan menerangi setiap panggung yang kami hadiri.
+            </p>
+            <p>
+              Kami percaya bahwa setiap gerakan memiliki jiwa. Karena itu, kami merawat
+              tradisi dengan penuh hormat, sekaligus merangkul kreativitas agar seni tari
+              tetap relevan dan memukau di setiap zaman.
+            </p>
+          </div>
+
+          <div class="photo-frame">
+  <div class="photo-inner">
+    <img
+      src="assets/foto%20tari1.jpg"
+      alt="Penampilan Sanggar Tari Hikari"
+      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+    />
+    <!-- Fallback jika foto gagal dimuat -->
+    <div class="photo-placeholder" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <circle cx="8.5" cy="8.5" r="1.6"/>
+        <path d="M21 15l-5-5L5 21"/>
+      </svg>
+      <span>FOTO PERTUNJUKAN</span>
+    </div>
+  </div>
+</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ KEUNGGULAN / SOROTAN LAYANAN ============ -->
+    <section class="section" id="keunggulan">
+      <div class="container">
+        <div style="text-align:center;">
+          <p class="section-kicker">Mengapa Memilih Kami</p>
+          <h2 class="section-title">Sorotan <em>Layanan</em></h2>
+          <div class="divider-gold center"></div>
+        </div>
+
+        <div class="cards-grid">
+          <!-- Kartu 1 -->
+          <article class="card">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="7" r="3"/>
+                <path d="M5 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/>
+              </svg>
+            </div>
+            <h3>Penari Terlatih &amp; Profesional</h3>
+            <p>
+              Setiap penari kami dibina dengan disiplin tinggi, teknik yang matang, serta
+              penghayatan mendalam terhadap setiap karakter tarian.
+            </p>
+          </article>
+
+          <!-- Kartu 2 -->
+          <article class="card">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 6h16M4 12h16M4 18h10"/>
+                <circle cx="19" cy="18" r="2"/>
+              </svg>
+            </div>
+            <h3>Ragam Tari Tradisional &amp; Kreasi</h3>
+            <p>
+              Dari tari klasik hingga kreasi modern kami menghadirkan
+              beragam pilihan yang dapat disesuaikan dengan tema acara Anda.
+            </p>
+          </article>
+
+          <!-- Kartu 3 -->
+          <article class="card">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 15.6 7.1 18.2 8 12.7 4 8.8 9.5 8z"/>
+              </svg>
+            </div>
+            <h3>Kostum &amp; Tata Rias Otentik</h3>
+            <p>
+              Detail kostum, aksesori, dan tata rias dibuat dengan penuh ketelitian,
+              menghadirkan nuansa budaya yang autentik dan memukau.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BANNER CTA PENUTUP ============ -->
+    <section class="section" id="ajakan">
+      <div class="container">
+        <div class="cta-banner">
+          <h2>Hadirkan <em>Cahaya Seni</em> di Acara Anda</h2>
+          <p>
+            Percayakan penampilan istimewa untuk pernikahan, peresmian, festival,
+            maupun acara korporat Anda kepada Sanggar Tari Hikari. Kami siap
+            menghadirkan pertunjukan yang berkesan dan berkelas.
+          </p>
+          <a href="booking.html" class="btn btn-gold">Booking Sekarang</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       D. FOOTER
+       ============================================================ -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer-brand">SANGGAR HIKARI</p>
+      <p>Seni • Gerak • Ekspresi &nbsp;|&nbsp; &copy; <span id="year"></span> Sanggar Tari Hikari</p>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       E. BOTTOM TAB BAR (mobile)
+       ============================================================ -->
+  <nav class="tabbar" aria-label="Navigasi bawah">
+    <!-- 1. Tentang -->
+    <a href="#tentang" class="active" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 11l9-8 9 8"/>
+        <path d="M5 10v10h14V10"/>
+      </svg>
+      <span>Tentang</span>
+    </a>
+    <!-- 2. Tarian -->
+    <a href="tarian.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3c2.5 2.5 4 5.5 4 8.5S14.5 17 12 19.5C9.5 17 8 14.5 8 11.5S9.5 5.5 12 3z"/>
+        <path d="M8 11.5c-2 .5-3.5 2-4.5 4"/>
+        <path d="M16 11.5c2 .5 3.5 2 4.5 4"/>
+      </svg>
+      <span>Tarian</span>
+    </a>
+    <!-- 3. Event -->
+    <a href="event.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="5" width="18" height="16" rx="2"/>
+        <path d="M8 3v4M16 3v4M3 10h18"/>
+      </svg>
+      <span>Event</span>
+    </a>
+    <!-- 4. Member -->
+    <a href="member.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="9" cy="8" r="3"/>
+        <path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/>
+        <circle cx="17" cy="9" r="2.4"/>
+        <path d="M21 20v-1a4 4 0 0 0-3-3.8"/>
+      </svg>
+      <span>Member</span>
+    </a>
+    <!-- 5. Medsos -->
+    <a href="sosmed.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M3 12h18M12 3c2.5 2.5 3.8 5.7 3.8 9S14.5 18.5 12 21c-2.5-2.5-3.8-5.7-3.8-9S9.5 5.5 12 3z"/>
+      </svg>
+      <span>Medsos</span>
+    </a>
+    <!-- 6. Booking (menonjol) -->
+    <a href="booking.html" class="tab-booking">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        <path d="M8 10h8M8 13h5"/>
+      </svg>
+      <span>Booking</span>
+    </a>
+  </nav>
+
+  <!-- ============================================================
+       F. JAVASCRIPT
+       ============================================================ -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      /* 1) Efek topbar saat scroll */
+      const topbar = document.getElementById('topbar');
+      const onScroll = () => {
+        if (!topbar) return;
+        topbar.classList.toggle('scrolled', window.scrollY > 30);
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      /* 2) Tahun footer otomatis */
+      const yearEl = document.getElementById('year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+      /* 3) Highlight menu aktif (desktop & mobile) berdasarkan hash */
+      const setActive = (selector, href) => {
+        document.querySelectorAll(selector).forEach(a => {
+          a.classList.toggle('active', a.getAttribute('href') === href);
+        });
+      };
+      setActive('.menu-desktop a', '#tentang');
+      setActive('.tabbar a', '#tentang');
+
+      /* 4) Animasi count-up (opsional, disiapkan untuk statistik nanti) */
+      // placeholder: bisa ditambahkan saat ada elemen data-count
+    });
+  </script>
+</body>
+</html>
